@@ -1,7 +1,11 @@
 package org.itxtech.flashmaster
 
+import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 
 /*
@@ -40,6 +44,30 @@ class MainActivity : AppCompatActivity() {
         settings.setAppCachePath(application.cacheDir.absolutePath)
         settings.loadsImagesAutomatically = true
         settings.allowUniversalAccessFromFileURLs = true
+        webView.webViewClient = object : WebViewClient() {
+            override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+                if (url!!.startsWith("file:///android_asset/index.html#/about")) {
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle(R.string.about_title)
+                        .setMessage(
+                            getString(R.string.about)
+                                .replace("ver", BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")")
+                                .replace("rev", BuildConfig.GIT_COMMIT)
+                        )
+                        .setNegativeButton("GitHub") { _, _ ->
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://github.com/iTXTech/FlashMasterAndroid")
+                                )
+                            )
+                        }
+                        .setPositiveButton(android.R.string.cancel) { _, _ -> "" }
+                        .show()
+                }
+                super.doUpdateVisitedHistory(view, url, isReload)
+            }
+        }
         webView.loadUrl("file:///android_asset/index.html")
     }
 }

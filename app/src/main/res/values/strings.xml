@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">FlashMaster</string>
+    <string name="about_title">About FlashMaster</string>
+    <string name="about">
+        FlashMaster ver\nRevision: rev\nby PeratX@iTXTech.org\n\nCopyright © 2019 iTX Technologies
+    </string>
 </resources>

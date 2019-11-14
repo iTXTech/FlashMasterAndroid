@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+def gitCommit = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -11,11 +13,19 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0.0"
+
+        buildConfigField "String", "BUILD_TIME", "\"${System.currentTimeMillis()}\""
+        buildConfigField "String", "GIT_COMMIT", "\"${gitCommit}\""
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = outputFileName.replace("app", "${defaultConfig.applicationId}_${defaultConfig.versionName}_${gitCommit}")
         }
     }
 }
