@@ -39,7 +39,6 @@ class MainActivity : AppCompatActivity() {
         settings.domStorageEnabled = true
         settings.setAppCacheEnabled(true)
         settings.allowFileAccess = true
-        settings.setAppCacheMaxSize(1024 * 1024 * 8)
         settings.databaseEnabled = true
         settings.setAppCachePath(application.cacheDir.absolutePath)
         settings.loadsImagesAutomatically = true
