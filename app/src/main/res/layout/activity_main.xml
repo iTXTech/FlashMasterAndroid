@@ -3,12 +3,40 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:background="@color/colorPrimaryDark"
         tools:context=".MainActivity">
+    <ImageView android:id="@+id/img"
+               android:src="@mipmap/ic_launcher"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               app:layout_constraintLeft_toLeftOf="parent"
+               app:layout_constraintRight_toRightOf="parent"
+               app:layout_constraintBottom_toBottomOf="parent"
+               app:layout_constraintTop_toTopOf="parent"
+               app:layout_constraintVertical_bias="0.4"/>
 
-    <WebView
-            android:id="@+id/webview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/app_name"
+              android:textSize="20sp"
+              android:textColor="#FFFFFF"
+              app:layout_constraintTop_toBottomOf="@id/img"
+              app:layout_constraintLeft_toLeftOf="parent"
+              app:layout_constraintRight_toRightOf="parent"/>
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Copyright © 2019 iTX Technologies"
+              android:textSize="15sp"
+              android:textColor="#FFFFFF"
+              app:layout_constraintLeft_toLeftOf="parent"
+              app:layout_constraintRight_toRightOf="parent"
+              app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <WebView android:visibility="invisible"
+             android:id="@+id/webview"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

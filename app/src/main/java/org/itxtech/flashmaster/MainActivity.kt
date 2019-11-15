@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
@@ -65,6 +67,13 @@ class MainActivity : AppCompatActivity() {
                         .show()
                 }
                 super.doUpdateVisitedHistory(view, url, isReload)
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                Handler().postDelayed({
+                    view?.visibility = View.VISIBLE
+                }, 500)
+                super.onPageFinished(view, url)
             }
         }
         webView.loadUrl("file:///android_asset/index.html")
