@@ -1,6 +1,15 @@
 # FlashMasterAndroid
 
-Android App of iTXTech FlashMaster
+[![Donate](https://img.shields.io/badge/alipay-donate-yellow.svg)](https://qr.alipay.com/FKX04751EZDP0SQ0BOT137)
+[![Build Status](https://travis-ci.org/iTXTech/FlashMasterAndroid.svg?branch=master)](https://travis-ci.org/iTXTech/FlashMasterAndroid)
+
+iTXTech FlashMaster App for Android 5.0+
+
+## Introduction
+
+[iTXTech FlashMaster](https://github.com/iTXTech/FlashMaster) is a powerful NAND Flash Part Number and Id query toolbox.
+
+This project wraps [iTXTech FlashMaster](https://github.com/iTXTech/FlashMaster) into an Android App, using WebView and Kotlin.
 
 ## License
 
