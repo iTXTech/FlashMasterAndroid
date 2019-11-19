@@ -32,20 +32,22 @@ import androidx.appcompat.app.AppCompatActivity
  *
  */
 class MainActivity : AppCompatActivity() {
+    private var webView: WebView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val webView = findViewById<WebView>(R.id.webview)
-        val settings = webView.settings
+        webView = findViewById(R.id.webview)
+        val settings = webView!!.settings
+        settings.setAppCachePath(application.cacheDir.absolutePath)
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
-        settings.setAppCacheEnabled(true)
         settings.allowFileAccess = true
         settings.databaseEnabled = true
-        settings.setAppCachePath(application.cacheDir.absolutePath)
+        settings.setAppCacheEnabled(true)
         settings.loadsImagesAutomatically = true
         settings.allowUniversalAccessFromFileURLs = true
-        webView.webViewClient = object : WebViewClient() {
+        webView!!.webViewClient = object : WebViewClient() {
             override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
                 if (url!!.startsWith("file:///android_asset/index.html#/about")) {
                     AlertDialog.Builder(this@MainActivity)
@@ -55,27 +57,40 @@ class MainActivity : AppCompatActivity() {
                                 .replace("ver", BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")")
                                 .replace("rev", BuildConfig.GIT_COMMIT)
                         )
-                        .setNegativeButton("GitHub") { _, _ ->
-                            startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("https://github.com/iTXTech/FlashMasterAndroid")
-                                )
-                            )
-                        }
+                        .setNegativeButton("GitHub") { _, _ -> openUri("https://github.com/iTXTech/FlashMasterAndroid") }
                         .setPositiveButton(android.R.string.cancel) { _, _ -> "" }
                         .show()
                 }
                 super.doUpdateVisitedHistory(view, url, isReload)
             }
 
+            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                if (!url!!.startsWith("file://")) {
+                    openUri(url)
+                    return true
+                }
+                return false
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 Handler().postDelayed({
                     view?.visibility = View.VISIBLE
-                }, 500)
+                }, 200)
                 super.onPageFinished(view, url)
             }
         }
-        webView.loadUrl("file:///android_asset/index.html")
+        webView!!.loadUrl("file:///android_asset/index.html")
+    }
+
+    fun openUri(uri: String) {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri)))
+    }
+
+    override fun onBackPressed() {
+        if (webView!!.canGoBack()) {
+            webView!!.goBack()
+        } else {
+            super.onBackPressed()
+        }
     }
 }
