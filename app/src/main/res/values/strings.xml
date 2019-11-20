@@ -4,4 +4,6 @@
     <string name="about">
         FlashMaster ver\nRevision: rev\nby PeratX@iTXTech.org\n\nLicensed under Apache License 2.0\n\nCopyright © 2019 iTX Technologies
     </string>
+    <string name="permDenied">Permission Denied.</string>
+    <string name="fileStored">File has been saved, check Pictures.</string>
 </resources>

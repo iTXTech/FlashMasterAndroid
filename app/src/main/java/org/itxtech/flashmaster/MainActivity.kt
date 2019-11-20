@@ -1,14 +1,26 @@
 package org.itxtech.flashmaster
 
+import android.Manifest
 import android.app.AlertDialog
+import android.content.ContentValues
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
+import android.provider.MediaStore
 import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 
 /*
  *
@@ -33,6 +45,7 @@ import androidx.appcompat.app.AppCompatActivity
  */
 class MainActivity : AppCompatActivity() {
     private var webView: WebView? = null
+    private var file: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,10 +92,65 @@ class MainActivity : AppCompatActivity() {
                 super.onPageFinished(view, url)
             }
         }
+        webView!!.setDownloadListener { url, _, _, _, _ ->
+            save(url)
+        }
         webView!!.loadUrl("file:///android_asset/index.html")
     }
 
-    fun openUri(uri: String) {
+    private fun save(url: String) {
+        file = url.substring(22)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+        } else {
+            write()
+        }
+    }
+
+    private fun write() {
+        val stream = assets.open(file!!)
+        val fileName = file!!.substringAfter("/")
+        val os: OutputStream?
+        os = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            val f =
+                File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absolutePath + "/" + fileName)
+            FileOutputStream(f)
+        } else {
+            val resolver = contentResolver
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+            }
+            val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            resolver.openOutputStream(uri!!)
+        }
+        while (stream.available() > 0) {
+            os!!.write(stream.read())
+        }
+        os!!.close()
+        Snackbar.make(findViewById(R.id.view), R.string.fileStored, Snackbar.LENGTH_LONG).show()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1) {
+            for (result in grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    file = null
+                    Snackbar.make(findViewById(R.id.view), R.string.permDenied, Snackbar.LENGTH_LONG).show()
+                    return
+                }
+            }
+            write()
+        }
+    }
+
+    private fun openUri(uri: String) {
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri)))
     }
 

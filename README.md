@@ -3,7 +3,7 @@
 [![Donate](https://img.shields.io/badge/alipay-donate-yellow.svg)](https://qr.alipay.com/FKX04751EZDP0SQ0BOT137)
 [![Build Status](https://travis-ci.org/iTXTech/FlashMasterAndroid.svg?branch=master)](https://travis-ci.org/iTXTech/FlashMasterAndroid)
 
-iTXTech FlashMaster App for Android 5.0+
+iTXTech FlashMaster App for Android 4.4+
 
 ## Introduction
 
