@@ -100,12 +100,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun save(url: String) {
         file = url.substring(22)
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+            PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this@MainActivity,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
         } else {
             write()
         }
@@ -116,8 +114,11 @@ class MainActivity : AppCompatActivity() {
         val fileName = file!!.substringAfter("/")
         val os: OutputStream?
         os = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            val f =
-                File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absolutePath + "/" + fileName)
+            val f = File(
+                Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES
+                ).absolutePath + "/" + fileName
+            )
             FileOutputStream(f)
         } else {
             val resolver = contentResolver
@@ -129,11 +130,15 @@ class MainActivity : AppCompatActivity() {
             val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
             resolver.openOutputStream(uri!!)
         }
-        while (stream.available() > 0) {
-            os!!.write(stream.read())
-        }
-        os!!.close()
-        Snackbar.make(findViewById(R.id.view), R.string.fileStored, Snackbar.LENGTH_LONG).show()
+        Thread {
+            while (stream.available() > 0) {
+                os!!.write(stream.read())
+            }
+            os!!.close()
+            runOnUiThread {
+                Snackbar.make(findViewById(R.id.view), R.string.fileStored, Snackbar.LENGTH_LONG).show()
+            }
+        }.start()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
