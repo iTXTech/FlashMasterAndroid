@@ -121,14 +121,13 @@ class MainActivity : AppCompatActivity() {
             )
             FileOutputStream(f)
         } else {
-            val resolver = contentResolver
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
                 put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
                 put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
             }
-            val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-            resolver.openOutputStream(uri!!)
+            val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            contentResolver.openOutputStream(uri!!)
         }
         Thread {
             while (stream.available() > 0) {
