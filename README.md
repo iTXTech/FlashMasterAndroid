@@ -1,4 +1,4 @@
-# FlashMasterAndroid
+# iTXTech FlashMasterAndroid
 
 [![Donate](https://img.shields.io/badge/alipay-donate-yellow.svg)](https://qr.alipay.com/FKX04751EZDP0SQ0BOT137)
 [![Build Status](https://travis-ci.org/iTXTech/FlashMasterAndroid.svg?branch=master)](https://travis-ci.org/iTXTech/FlashMasterAndroid)
