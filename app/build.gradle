@@ -11,8 +11,8 @@ android {
         applicationId "org.itxtech.flashmaster"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 10
-        versionName "1.0.8"
+        versionCode 11
+        versionName "1.1.0"
 
         buildConfigField "String", "BUILD_TIME", "\"${System.currentTimeMillis()}\""
         buildConfigField "String", "GIT_COMMIT", "\"${gitCommit}\""
@@ -35,6 +35,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.core:core-ktx:1.2.0-rc01'
-    implementation 'com.google.android.material:material:1.2.0-alpha02'
+    implementation 'com.google.android.material:material:1.2.0-alpha03'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 }

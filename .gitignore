@@ -5,3 +5,4 @@ local.properties
 build
 app/app.iml
 app/build
+app/release
