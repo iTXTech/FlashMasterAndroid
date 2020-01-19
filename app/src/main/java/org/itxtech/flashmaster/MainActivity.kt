@@ -27,7 +27,7 @@ import java.io.OutputStream
  *
  * FlashMasterAndroid
  *
- * Copyright (C) 2019 iTX Technologies
+ * Copyright (C) 2019-2020 iTX Technologies
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
