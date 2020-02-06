@@ -13,12 +13,13 @@ import android.os.Environment
 import android.os.Handler
 import android.provider.MediaStore
 import android.view.View
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
+import org.xwalk.core.XWalkDownloadListener
+import org.xwalk.core.XWalkResourceClient
+import org.xwalk.core.XWalkView
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -45,7 +46,7 @@ import java.io.OutputStream
  *
  */
 class MainActivity : AppCompatActivity() {
-    private var webView: WebView? = null
+    private var webView: XWalkView? = null
     private var file: String? = null
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -54,16 +55,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         webView = findViewById(R.id.webview)
         val settings = webView!!.settings
-        settings.setAppCachePath(application.cacheDir.absolutePath)
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
         settings.allowFileAccess = true
         settings.databaseEnabled = true
-        settings.setAppCacheEnabled(true)
         settings.loadsImagesAutomatically = true
         settings.allowUniversalAccessFromFileURLs = true
-        webView!!.webViewClient = object : WebViewClient() {
-            override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+        webView!!.setResourceClient(object : XWalkResourceClient(webView) {
+            override fun doUpdateVisitedHistory(view: XWalkView?, url: String?, isReload: Boolean) {
                 if (url!!.startsWith("file:///android_asset/index.html#/about")) {
                     AlertDialog.Builder(this@MainActivity)
                         .setTitle(R.string.about_title)
@@ -79,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                 super.doUpdateVisitedHistory(view, url, isReload)
             }
 
-            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+            override fun shouldOverrideUrlLoading(view: XWalkView?, url: String?): Boolean {
                 if (!url!!.startsWith("file://")) {
                     openUri(url)
                     return true
@@ -87,16 +86,24 @@ class MainActivity : AppCompatActivity() {
                 return false
             }
 
-            override fun onPageFinished(view: WebView?, url: String?) {
+            override fun onLoadFinished(view: XWalkView?, url: String?) {
                 Handler().postDelayed({
                     view?.visibility = View.VISIBLE
                 }, 200)
-                super.onPageFinished(view, url)
+                super.onLoadFinished(view, url)
             }
-        }
-        webView!!.setDownloadListener { url, _, _, _, _ ->
-            save(url)
-        }
+        })
+        webView!!.setDownloadListener(object : XWalkDownloadListener(this) {
+            override fun onDownloadStart(
+                url: String?,
+                userAgent: String?,
+                contentDisposition: String?,
+                mimetype: String?,
+                contentLength: Long
+            ) {
+                save(url!!)
+            }
+        })
         webView!!.loadUrl("file:///android_asset/index.html")
     }
 
@@ -158,13 +165,5 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUri(uri: String) {
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri)))
-    }
-
-    override fun onBackPressed() {
-        if (webView!!.canGoBack()) {
-            webView!!.goBack()
-        } else {
-            super.onBackPressed()
-        }
     }
 }
