@@ -46,6 +46,10 @@ import java.io.OutputStream
  *
  */
 class MainActivity : AppCompatActivity() {
+    private val patchJs: String = "javascript:document.getElementsByClassName(\"mdi-book-information-variant\")[0]" +
+            ".setAttribute(\"class\", document.getElementsByClassName(\"mdi-book-information-variant\")[0]" +
+            ".getAttribute(\"class\").replace(\"mdi-book-information-variant\", \"mdi-information\"));"
+
     private var webView: XWalkView? = null
     private var file: String? = null
 
@@ -56,7 +60,10 @@ class MainActivity : AppCompatActivity() {
         webView = findViewById(R.id.webview)
         webView!!.setResourceClient(object : XWalkResourceClient(webView) {
             override fun doUpdateVisitedHistory(view: XWalkView?, url: String?, isReload: Boolean) {
-                if (url!!.startsWith("file:///android_asset/index.html#/about")) {
+                if (url!!.startsWith("file:///android_asset/index.html#/decode")) {
+                    view!!.load(patchJs, "")
+                }
+                if (url.startsWith("file:///android_asset/index.html#/about")) {
                     AlertDialog.Builder(this@MainActivity)
                         .setTitle(R.string.about_title)
                         .setMessage(
@@ -81,7 +88,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onLoadFinished(view: XWalkView?, url: String?) {
                 Handler().postDelayed({
-                    view?.visibility = View.VISIBLE
+                    view!!.visibility = View.VISIBLE
                 }, 200)
                 super.onLoadFinished(view, url)
             }
@@ -97,15 +104,19 @@ class MainActivity : AppCompatActivity() {
                 save(url!!)
             }
         })
+
         webView!!.load("file:///android_asset/index.html", "")
     }
 
     private fun save(url: String) {
         file = url.substring(22)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
-            PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this@MainActivity,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this@MainActivity,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1
+            )
         } else {
             write()
         }

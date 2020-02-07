@@ -11,8 +11,8 @@ android {
         applicationId "org.itxtech.flashmaster"
         minSdkVersion 14
         targetSdkVersion 29
-        versionCode 13
-        versionName "1.2.1C"
+        versionCode 15
+        versionName "1.2.2C"
 
         buildConfigField "String", "BUILD_TIME", "\"${System.currentTimeMillis()}\""
         buildConfigField "String", "GIT_COMMIT", "\"${gitCommit}\""
