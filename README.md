@@ -1,9 +1,19 @@
 # iTXTech FlashMasterAndroid
 
 [![Donate](https://img.shields.io/badge/alipay-donate-yellow.svg)](https://qr.alipay.com/FKX04751EZDP0SQ0BOT137)
-[![Build Status](https://travis-ci.org/iTXTech/FlashMasterAndroid.svg?branch=master)](https://travis-ci.org/iTXTech/FlashMasterAndroid)
+[![Build Status](https://travis-ci.org/iTXTech/FlashMasterAndroid.svg?branch=crosswalk)](https://travis-ci.org/iTXTech/FlashMasterAndroid)
 
-iTXTech FlashMaster App for Android 4.4+
+iTXTech FlashMaster App for Android 4.0+
+
+Powered by [Intel Crosswalk](https://github.com/crosswalk-project/crosswalk)
+
+## Attention
+
+**Android 4.4+ Users should use master branch.**
+
+**This edition of FlashMasterAndroid has a "C" suffix in version string.**
+
+For example: FlashMaster **1.2.1C** (13)
 
 ## Introduction
 

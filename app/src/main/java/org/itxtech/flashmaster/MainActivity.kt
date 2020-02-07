@@ -54,13 +54,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         webView = findViewById(R.id.webview)
-        val settings = webView!!.settings
-        settings.javaScriptEnabled = true
-        settings.domStorageEnabled = true
-        settings.allowFileAccess = true
-        settings.databaseEnabled = true
-        settings.loadsImagesAutomatically = true
-        settings.allowUniversalAccessFromFileURLs = true
         webView!!.setResourceClient(object : XWalkResourceClient(webView) {
             override fun doUpdateVisitedHistory(view: XWalkView?, url: String?, isReload: Boolean) {
                 if (url!!.startsWith("file:///android_asset/index.html#/about")) {
@@ -104,7 +97,7 @@ class MainActivity : AppCompatActivity() {
                 save(url!!)
             }
         })
-        webView!!.loadUrl("file:///android_asset/index.html")
+        webView!!.load("file:///android_asset/index.html", "")
     }
 
     private fun save(url: String) {
