@@ -1,7 +1,6 @@
 package org.itxtech.flashmaster
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Intent
@@ -53,7 +52,6 @@ class MainActivity : AppCompatActivity() {
     private var webView: XWalkView? = null
     private var file: String? = null
 
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
