@@ -1,28 +1,3 @@
-package org.itxtech.flashmaster
-
-import android.Manifest
-import android.annotation.SuppressLint
-import android.app.AlertDialog
-import android.content.ContentValues
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Environment
-import android.os.Handler
-import android.provider.MediaStore
-import android.view.View
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.google.android.material.snackbar.Snackbar
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
-
 /*
  *
  * FlashMasterAndroid
@@ -44,25 +19,52 @@ import java.io.OutputStream
  * @author PeratX
  *
  */
+
+package org.itxtech.flashmaster
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.ContentValues
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.os.Environment
+import android.os.Handler
+import android.provider.MediaStore
+import android.view.View
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import kotlin.concurrent.thread
+
 class MainActivity : AppCompatActivity() {
-    private var webView: WebView? = null
-    private var file: String? = null
+    private lateinit var file: String
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        webView = findViewById(R.id.webview)
-        val settings = webView!!.settings
-        settings.setAppCachePath(application.cacheDir.absolutePath)
-        settings.javaScriptEnabled = true
-        settings.domStorageEnabled = true
-        settings.allowFileAccess = true
-        settings.databaseEnabled = true
-        settings.setAppCacheEnabled(true)
-        settings.loadsImagesAutomatically = true
-        settings.allowUniversalAccessFromFileURLs = true
-        webView!!.webViewClient = object : WebViewClient() {
+        webview.settings?.apply {
+            setAppCachePath(application.cacheDir.absolutePath)
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            allowFileAccess = true
+            databaseEnabled = true
+            setAppCacheEnabled(true)
+            loadsImagesAutomatically = true
+            allowUniversalAccessFromFileURLs = true
+        }
+        webview.webViewClient = object : WebViewClient() {
             override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
                 if (url!!.startsWith("file:///android_asset/index.html#/about")) {
                     AlertDialog.Builder(this@MainActivity)
@@ -73,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                                 .replace("rev", BuildConfig.GIT_COMMIT)
                         )
                         .setNegativeButton("GitHub") { _, _ -> openUri("https://github.com/iTXTech/FlashMasterAndroid") }
-                        .setPositiveButton(android.R.string.cancel) { _, _ -> "" }
+                        .setPositiveButton(android.R.string.cancel, null)
                         .show()
                 }
                 super.doUpdateVisitedHistory(view, url, isReload)
@@ -94,34 +96,38 @@ class MainActivity : AppCompatActivity() {
                 super.onPageFinished(view, url)
             }
         }
-        webView!!.setDownloadListener { url, _, _, _, _ ->
+        webview.setDownloadListener { url, _, _, _, _ ->
             save(url)
         }
-        webView!!.loadUrl("file:///android_asset/index.html")
+        webview.loadUrl("file:///android_asset/index.html")
     }
 
     private fun save(url: String) {
         file = url.substring(22)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
-            PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this@MainActivity,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this@MainActivity,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1
+            )
         } else {
             write()
         }
     }
 
     private fun write() {
-        val stream = assets.open(file!!)
-        val fileName = file!!.substringAfter("/")
+        val stream = assets.open(file)
+        val fileName = file.substringAfter("/")
         val os: OutputStream?
         os = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            val f = File(
-                Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_PICTURES
-                ).absolutePath + "/" + fileName
+            FileOutputStream(
+                File(
+                    Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES
+                    ).absolutePath + "/" + fileName
+                )
             )
-            FileOutputStream(f)
         } else {
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
@@ -131,15 +137,14 @@ class MainActivity : AppCompatActivity() {
             val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
             contentResolver.openOutputStream(uri!!)
         }
-        Thread {
-            while (stream.available() > 0) {
-                os!!.write(stream.read())
+        thread {
+            os?.use {
+                stream.copyTo(it)
             }
-            os!!.close()
             runOnUiThread {
-                Snackbar.make(findViewById(R.id.view), R.string.fileStored, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(view, R.string.fileStored, Snackbar.LENGTH_LONG).show()
             }
-        }.start()
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
@@ -147,8 +152,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == 1) {
             for (result in grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {
-                    file = null
-                    Snackbar.make(findViewById(R.id.view), R.string.permDenied, Snackbar.LENGTH_LONG).show()
+                    Snackbar.make(view, R.string.permDenied, Snackbar.LENGTH_LONG).show()
                     return
                 }
             }
@@ -161,8 +165,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (webView!!.canGoBack()) {
-            webView!!.goBack()
+        if (webview.canGoBack()) {
+            webview.goBack()
         } else {
             super.onBackPressed()
         }
