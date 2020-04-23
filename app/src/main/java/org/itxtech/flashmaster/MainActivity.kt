@@ -1,28 +1,3 @@
-package org.itxtech.flashmaster
-
-import android.Manifest
-import android.app.AlertDialog
-import android.content.ContentValues
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Environment
-import android.os.Handler
-import android.provider.MediaStore
-import android.view.View
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.google.android.material.snackbar.Snackbar
-import org.xwalk.core.XWalkDownloadListener
-import org.xwalk.core.XWalkResourceClient
-import org.xwalk.core.XWalkView
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
-
 /*
  *
  * FlashMasterAndroid
@@ -44,24 +19,43 @@ import java.io.OutputStream
  * @author PeratX
  *
  */
-class MainActivity : AppCompatActivity() {
-    private val patchJs: String = "javascript:document.getElementsByClassName(\"mdi-book-information-variant\")[0]" +
-            ".setAttribute(\"class\", document.getElementsByClassName(\"mdi-book-information-variant\")[0]" +
-            ".getAttribute(\"class\").replace(\"mdi-book-information-variant\", \"mdi-information\"));"
 
-    private var webView: XWalkView? = null
-    private var file: String? = null
+package org.itxtech.flashmaster
+
+import android.Manifest
+import android.app.AlertDialog
+import android.content.ContentValues
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.os.Environment
+import android.os.Handler
+import android.provider.MediaStore
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_main.*
+import org.xwalk.core.XWalkDownloadListener
+import org.xwalk.core.XWalkResourceClient
+import org.xwalk.core.XWalkView
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import kotlin.concurrent.thread
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var file: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        webView = findViewById(R.id.webview)
-        webView!!.setResourceClient(object : XWalkResourceClient(webView) {
+        webview.setResourceClient(object : XWalkResourceClient(webview) {
             override fun doUpdateVisitedHistory(view: XWalkView?, url: String?, isReload: Boolean) {
-                if (url!!.startsWith("file:///android_asset/index.html#/decode")) {
-                    view!!.load(patchJs, "")
-                }
-                if (url.startsWith("file:///android_asset/index.html#/about")) {
+                if (url!!.startsWith("file:///android_asset/index.html#/about")) {
                     AlertDialog.Builder(this@MainActivity)
                         .setTitle(R.string.about_title)
                         .setMessage(
@@ -70,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                                 .replace("rev", BuildConfig.GIT_COMMIT)
                         )
                         .setNegativeButton("GitHub") { _, _ -> openUri("https://github.com/iTXTech/FlashMasterAndroid") }
-                        .setPositiveButton(android.R.string.cancel) { _, _ -> "" }
+                        .setPositiveButton(android.R.string.cancel, null)
                         .show()
                 }
                 super.doUpdateVisitedHistory(view, url, isReload)
@@ -91,7 +85,7 @@ class MainActivity : AppCompatActivity() {
                 super.onLoadFinished(view, url)
             }
         })
-        webView!!.setDownloadListener(object : XWalkDownloadListener(this) {
+        webview.setDownloadListener(object : XWalkDownloadListener(this) {
             override fun onDownloadStart(
                 url: String?,
                 userAgent: String?,
@@ -102,8 +96,7 @@ class MainActivity : AppCompatActivity() {
                 save(url!!)
             }
         })
-
-        webView!!.load("file:///android_asset/index.html", "")
+        webview.load("file:///android_asset/index.html", "")
     }
 
     private fun save(url: String) {
@@ -120,17 +113,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun write() {
-        val stream = assets.open(file!!)
-        val fileName = file!!.substringAfter("/")
+        val stream = assets.open(file)
+        val fileName = file.substringAfter("/")
         val os: OutputStream?
         os = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            val f = File(
-                Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_PICTURES
-                ).absolutePath + "/" + fileName
+            FileOutputStream(
+                File(
+                    Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES
+                    ).absolutePath + "/" + fileName
+                )
             )
-            FileOutputStream(f)
         } else {
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
@@ -140,15 +135,15 @@ class MainActivity : AppCompatActivity() {
             val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
             contentResolver.openOutputStream(uri!!)
         }
-        Thread {
-            while (stream.available() > 0) {
-                os!!.write(stream.read())
+        thread {
+            os?.use {
+                stream.copyTo(it)
             }
             os!!.close()
             runOnUiThread {
-                Snackbar.make(findViewById(R.id.view), R.string.fileStored, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(view, R.string.fileStored, Snackbar.LENGTH_LONG).show()
             }
-        }.start()
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
@@ -156,8 +151,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == 1) {
             for (result in grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {
-                    file = null
-                    Snackbar.make(findViewById(R.id.view), R.string.permDenied, Snackbar.LENGTH_LONG).show()
+                    Snackbar.make(view, R.string.permDenied, Snackbar.LENGTH_LONG).show()
                     return
                 }
             }
@@ -165,7 +159,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openUri(uri: String) {
+    private fun openUri(uri: String) =
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri)))
-    }
 }
