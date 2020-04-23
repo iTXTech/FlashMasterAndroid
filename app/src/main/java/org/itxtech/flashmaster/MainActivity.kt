@@ -116,6 +116,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun write() {
         val stream = assets.open(file)
         val fileName = file.substringAfter("/")
@@ -160,9 +161,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openUri(uri: String) {
+    private fun openUri(uri: String) =
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri)))
-    }
 
     override fun onBackPressed() {
         if (webview.canGoBack()) {
