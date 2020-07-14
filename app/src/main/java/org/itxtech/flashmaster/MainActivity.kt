@@ -40,6 +40,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import org.xwalk.core.XWalkDownloadListener
+import org.xwalk.core.XWalkNavigationHistory
 import org.xwalk.core.XWalkResourceClient
 import org.xwalk.core.XWalkView
 import java.io.File
@@ -139,7 +140,7 @@ class MainActivity : AppCompatActivity() {
             os?.use {
                 stream.copyTo(it)
             }
-            os!!.close()
+            os?.close()
             runOnUiThread {
                 Snackbar.make(view, R.string.fileStored, Snackbar.LENGTH_LONG).show()
             }
@@ -161,4 +162,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUri(uri: String) =
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri)))
+
+    override fun onBackPressed() {
+        if (webview.navigationHistory.canGoBack()) {
+            webview.navigationHistory.navigate(XWalkNavigationHistory.Direction.BACKWARD, 1)
+        } else {
+            super.onBackPressed()
+        }
+    }
 }
