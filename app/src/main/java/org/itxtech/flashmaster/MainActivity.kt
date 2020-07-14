@@ -142,6 +142,7 @@ class MainActivity : AppCompatActivity() {
             os?.use {
                 stream.copyTo(it)
             }
+            os?.close()
             runOnUiThread {
                 Snackbar.make(view, R.string.fileStored, Snackbar.LENGTH_LONG).show()
             }
