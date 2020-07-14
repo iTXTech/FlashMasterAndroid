@@ -54,13 +54,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        webview.settings?.apply {
+        webview.settings.apply {
+            setAppCacheEnabled(true)
             setAppCachePath(application.cacheDir.absolutePath)
             javaScriptEnabled = true
             domStorageEnabled = true
             allowFileAccess = true
             databaseEnabled = true
-            setAppCacheEnabled(true)
             loadsImagesAutomatically = true
             allowUniversalAccessFromFileURLs = true
         }
