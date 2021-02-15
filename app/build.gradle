@@ -1,16 +1,15 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 def gitCommit = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
     defaultConfig {
         applicationId "org.itxtech.flashmaster"
         minSdkVersion 19
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 20
         versionName "1.3.1"
 
@@ -28,13 +27,20 @@ android {
             outputFileName = outputFileName.replace("app", "${defaultConfig.applicationId}_${defaultConfig.versionName}_${gitCommit}")
         }
     }
+    buildFeatures {
+        viewBinding true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.3.0-alpha01'
-    implementation 'androidx.core:core-ktx:1.5.0-alpha01'
-    implementation 'com.google.android.material:material:1.3.0-alpha01'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta8'
+    implementation 'androidx.appcompat:appcompat:1.3.0-beta01'
+    implementation 'androidx.core:core-ktx:1.5.0-beta01'
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.0-alpha2'
 }

@@ -2,7 +2,7 @@
     <string name="app_name">FlashMaster</string>
     <string name="about_title">About FlashMaster</string>
     <string name="about">
-        FlashMaster ver\nRevision: rev\nby PeratX@iTXTech.org\n\nLicensed under Apache License 2.0\n\nCopyright © 2019-2020 iTX Technologies
+        FlashMaster ver\nRevision: rev\nby PeratX@iTXTech.org\n\nLicensed under GNU AGPLv3.\n\nCopyright © 2019-2021 iTX Technologies
     </string>
     <string name="permDenied">Permission Denied.</string>
     <string name="fileStored">File has been saved, check Pictures.</string>
