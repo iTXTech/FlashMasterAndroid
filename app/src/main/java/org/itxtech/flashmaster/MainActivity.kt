@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
         with(binding.webview) {
             settings.apply {
                 setAppCacheEnabled(true)
@@ -63,6 +63,8 @@ class MainActivity : AppCompatActivity() {
                 databaseEnabled = true
                 loadsImagesAutomatically = true
                 allowUniversalAccessFromFileURLs = true
+                allowFileAccessFromFileURLs = true
+                userAgentString = "FlashMasterAndroid/" + BuildConfig.VERSION_NAME
             }
             webViewClient = object : WebViewClient() {
                 override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
