@@ -2,19 +2,20 @@
  *
  * FlashMasterAndroid
  *
- * Copyright (C) 2019-2020 iTX Technologies
+ * Copyright (C) 2019-2021 iTX Technologies
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * @author PeratX
  *
@@ -28,76 +29,78 @@ import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Environment
-import android.os.Handler
+import android.os.*
 import android.provider.MediaStore
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_main.*
+import org.itxtech.flashmaster.databinding.ActivityMainBinding
 import org.xwalk.core.XWalkDownloadListener
 import org.xwalk.core.XWalkNavigationHistory
 import org.xwalk.core.XWalkResourceClient
 import org.xwalk.core.XWalkView
 import java.io.File
 import java.io.FileOutputStream
-import java.io.OutputStream
 import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
     private lateinit var file: String
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        webview.setResourceClient(object : XWalkResourceClient(webview) {
-            override fun doUpdateVisitedHistory(view: XWalkView?, url: String?, isReload: Boolean) {
-                if (url!!.startsWith("file:///android_asset/index.html#/about")) {
-                    AlertDialog.Builder(this@MainActivity)
-                        .setTitle(R.string.about_title)
-                        .setMessage(
-                            getString(R.string.about)
-                                .replace("ver", BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")")
-                                .replace("rev", BuildConfig.GIT_COMMIT)
-                        )
-                        .setNegativeButton("GitHub") { _, _ -> openUri("https://github.com/iTXTech/FlashMasterAndroid") }
-                        .setPositiveButton(android.R.string.cancel, null)
-                        .show()
-                }
-                super.doUpdateVisitedHistory(view, url, isReload)
-            }
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        with(binding.webview) {
+            userAgentString = "FlashMasterAndroid/" + BuildConfig.VERSION_NAME
 
-            override fun shouldOverrideUrlLoading(view: XWalkView?, url: String?): Boolean {
-                if (!url!!.startsWith("file://")) {
-                    openUri(url)
-                    return true
+            setResourceClient(object : XWalkResourceClient(this) {
+                override fun doUpdateVisitedHistory(view: XWalkView?, url: String?, isReload: Boolean) {
+                    if (url!!.startsWith("file:///android_asset/index.html#/about")) {
+                        AlertDialog.Builder(this@MainActivity)
+                            .setTitle(R.string.about_title)
+                            .setMessage(
+                                getString(R.string.about)
+                                    .replace("ver", BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")")
+                                    .replace("rev", BuildConfig.GIT_COMMIT)
+                            )
+                            .setNegativeButton("GitHub") { _, _ -> openUri("https://github.com/iTXTech/FlashMasterAndroid") }
+                            .setPositiveButton(android.R.string.cancel, null)
+                            .show()
+                    }
+                    super.doUpdateVisitedHistory(view, url, isReload)
                 }
-                return false
-            }
 
-            override fun onLoadFinished(view: XWalkView?, url: String?) {
-                Handler().postDelayed({
-                    view!!.visibility = View.VISIBLE
-                }, 200)
-                super.onLoadFinished(view, url)
-            }
-        })
-        webview.setDownloadListener(object : XWalkDownloadListener(this) {
-            override fun onDownloadStart(
-                url: String?,
-                userAgent: String?,
-                contentDisposition: String?,
-                mimetype: String?,
-                contentLength: Long
-            ) {
-                save(url!!)
-            }
-        })
-        webview.load("file:///android_asset/index.html", "")
+                override fun shouldOverrideUrlLoading(view: XWalkView?, url: String?): Boolean {
+                    if (!url!!.startsWith("file://")) {
+                        openUri(url)
+                        return true
+                    }
+                    return false
+                }
+
+                override fun onLoadFinished(view: XWalkView?, url: String?) {
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        view!!.visibility = View.VISIBLE
+                    }, 200)
+                    super.onLoadFinished(view, url)
+                }
+            })
+            setDownloadListener(object : XWalkDownloadListener(this@MainActivity) {
+                override fun onDownloadStart(
+                    url: String?,
+                    userAgent: String?,
+                    contentDisposition: String?,
+                    mimetype: String?,
+                    contentLength: Long
+                ) {
+                    save(url!!)
+                }
+            })
+            load("file:///android_asset/index.html", "")
+        }
     }
 
     private fun save(url: String) {
@@ -118,8 +121,7 @@ class MainActivity : AppCompatActivity() {
     private fun write() {
         val stream = assets.open(file)
         val fileName = file.substringAfter("/")
-        val os: OutputStream?
-        os = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        val os = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             FileOutputStream(
                 File(
                     Environment.getExternalStoragePublicDirectory(
@@ -142,7 +144,7 @@ class MainActivity : AppCompatActivity() {
             }
             os?.close()
             runOnUiThread {
-                Snackbar.make(view, R.string.fileStored, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(binding.view, R.string.fileStored, Snackbar.LENGTH_LONG).show()
             }
         }
     }
@@ -152,7 +154,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == 1) {
             for (result in grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {
-                    Snackbar.make(view, R.string.permDenied, Snackbar.LENGTH_LONG).show()
+                    Snackbar.make(binding.view, R.string.permDenied, Snackbar.LENGTH_LONG).show()
                     return
                 }
             }
@@ -164,8 +166,8 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri)))
 
     override fun onBackPressed() {
-        if (webview.navigationHistory.canGoBack()) {
-            webview.navigationHistory.navigate(XWalkNavigationHistory.Direction.BACKWARD, 1)
+        if (binding.webview.navigationHistory.canGoBack()) {
+            binding.webview.navigationHistory.navigate(XWalkNavigationHistory.Direction.BACKWARD, 1)
         } else {
             super.onBackPressed()
         }
