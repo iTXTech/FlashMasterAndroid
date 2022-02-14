@@ -2,7 +2,7 @@
     <string name="app_name">FlashMaster</string>
     <string name="about_title">关于 FlashMaster</string>
     <string name="about">
-        FlashMaster ver\nRevision: rev\nby PeratX@iTXTech.org\n\n遵循 GNU AGPLv3 开源。\n\nCopyright © 2019-2021 iTX Technologies
+        FlashMaster ver\nRevision: rev\nby PeratX@iTXTech.org\n\n遵循 GNU AGPLv3 开源。\n\nCopyright © 2019-2022 iTX Technologies
     </string>
     <string name="permDenied">未获得权限。</string>
     <string name="fileStored">文件已保存，请查看图片。</string>

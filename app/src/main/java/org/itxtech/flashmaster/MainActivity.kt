@@ -2,7 +2,7 @@
  *
  * FlashMasterAndroid
  *
- * Copyright (C) 2019-2021 iTX Technologies
+ * Copyright (C) 2019-2022 iTX Technologies
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -144,7 +144,6 @@ class MainActivity : AppCompatActivity() {
             os?.use {
                 stream.copyTo(it)
             }
-            os?.close()
             runOnUiThread {
                 Snackbar.make(binding.view, R.string.fileStored, Snackbar.LENGTH_LONG).show()
             }
